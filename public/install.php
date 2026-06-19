@@ -113,15 +113,35 @@ ENV;
             // Se ainda falhar, baixa o composer.phar localmente e executa
             if ($r['code'] !== 0) {
                 $logs[] = ['label' => 'Aviso: Composer global falhou, tentando baixar composer.phar...', 'ok' => true, 'out' => $r['out']];
-                @copy('https://getcomposer.org/installer', $basePath . '/composer-setup.php');
-                if (file_exists($basePath . '/composer-setup.php')) {
-                    runCmd("{$phpBin} composer-setup.php --quiet", $basePath);
-                    @unlink($basePath . '/composer-setup.php');
+                
+                $url = 'https://getcomposer.org/composer.phar';
+                $dest = $basePath . '/composer.phar';
+                
+                runCmd("curl -sS -o " . escapeshellarg($dest) . " " . escapeshellarg($url), $basePath);
+                if (!file_exists($dest)) {
+                    runCmd("wget -q -O " . escapeshellarg($dest) . " " . escapeshellarg($url), $basePath);
+                }
+                if (!file_exists($dest) && function_exists('curl_init')) {
+                    $ch = @curl_init($url);
+                    $fp = @fopen($dest, 'wb');
+                    if ($ch && $fp) {
+                        @curl_setopt($ch, CURLOPT_FILE, $fp);
+                        @curl_setopt($ch, CURLOPT_HEADER, 0);
+                        @curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+                        @curl_exec($ch);
+                        @curl_close($ch);
+                        @fclose($fp);
+                    }
+                }
+                if (!file_exists($dest)) {
+                    @copy($url, $dest);
                 }
                 
-                if (file_exists($basePath . '/composer.phar')) {
+                if (file_exists($dest)) {
                     $r = runCmd("{$phpBin} composer.phar install --no-dev --optimize-autoloader --no-interaction", $basePath);
-                    @unlink($basePath . '/composer.phar');
+                    @unlink($dest);
+                } else {
+                    $r = ['code' => 99, 'out' => 'Erro: Nao foi possivel baixar o composer.phar por nenhum metodo (curl, wget, php-curl, copy).'];
                 }
             }
             
