@@ -1,8 +1,12 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=$(pwd)
-    - /usr/local/bin/php $DEPLOYPATH/artisan config:clear 2>/dev/null || true
-    - /usr/local/bin/php $DEPLOYPATH/artisan route:clear 2>/dev/null || true
-    - /usr/local/bin/php $DEPLOYPATH/artisan view:clear 2>/dev/null || true
-    - /usr/local/bin/php $DEPLOYPATH/artisan config:cache 2>/dev/null || true
+    - export APPPATH=$(pwd)
+    - export PUBHTML=$(echo ~)/public_html
+    - /bin/cp "$APPPATH/public_html_index.php" "$PUBHTML/index.php"
+    - /bin/cp "$APPPATH/public_html_htaccess" "$PUBHTML/.htaccess"
+    - /bin/cp "$APPPATH/public/install.php" "$PUBHTML/install.php" 2>/dev/null || true
+    - /bin/cp -R "$APPPATH/public/build" "$PUBHTML/" 2>/dev/null || true
+    - /usr/local/bin/php "$APPPATH/artisan" config:clear 2>/dev/null || true
+    - /usr/local/bin/php "$APPPATH/artisan" route:clear 2>/dev/null || true
+    - /usr/local/bin/php "$APPPATH/artisan" view:clear 2>/dev/null || true

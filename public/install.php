@@ -8,7 +8,18 @@
  * ============================================================
  */
 
-$basePath = dirname(__DIR__);
+// Auto-detectar o caminho do Laravel (funciona tanto em public/ quanto em public_html/)
+$homeDir   = dirname(__DIR__);
+$basePath  = null;
+$candidates = array_merge(
+    glob($homeDir . '/*/site_heimdall', GLOB_ONLYDIR) ?: [],
+    [$homeDir . '/site_heimdall', $homeDir]
+);
+foreach ($candidates as $dir) {
+    if (file_exists($dir . '/artisan')) { $basePath = $dir; break; }
+}
+if (!$basePath) { $basePath = $homeDir; } // fallback
+
 $envFile  = $basePath . '/.env';
 $step     = $_POST['step'] ?? 'form';
 $logs     = [];
