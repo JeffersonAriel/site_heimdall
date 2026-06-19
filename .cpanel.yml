@@ -1,17 +1,4 @@
 ---
 deployment:
   tasks:
-    - export APPPATH=$(pwd)
-    - export PUBHTML=$(echo ~)/public_html
-    - /bin/cp $APPPATH/public_html_index.php $PUBHTML/index.php
-    - /bin/cp $APPPATH/public_html_htaccess $PUBHTML/.htaccess
-    - /bin/cp $APPPATH/public/install.php $PUBHTML/install.php || true
-    - touch $APPPATH/.env
-    - chmod 664 $APPPATH/.env
-    - chmod -R 775 $APPPATH/storage
-    - chmod -R 775 $APPPATH/bootstrap/cache
-    - cd $APPPATH && /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction || true
-    - /bin/cp -R $APPPATH/public/build $PUBHTML/ || true
-    - /usr/local/bin/php $APPPATH/artisan config:clear || true
-    - /usr/local/bin/php $APPPATH/artisan route:clear || true
-    - /usr/local/bin/php $APPPATH/artisan view:clear || true
+    - /bin/bash $(pwd)/deploy.sh
