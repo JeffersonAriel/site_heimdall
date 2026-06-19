@@ -158,8 +158,8 @@ ENV;
             $logs[] = ['label' => 'composer install', 'ok' => $r['code'] === 0, 'out' => $r['out']];
         }
 
-        // Migrations
-        $r = artisan('migrate --force', $basePath);
+        // Migrations (fresh = drop all tables first, then run all migrations)
+        $r = artisan('migrate:fresh --force', $basePath);
         $logs[] = ['label' => 'php artisan migrate', 'ok' => $r['code'] === 0, 'out' => $r['out']];
 
         // Seeders (opcional)
