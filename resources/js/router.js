@@ -21,6 +21,7 @@ import StockDashboard     from './Pages/ERP/StockDashboard.vue';
 import ProductionDashboard from './Pages/ERP/ProductionDashboard.vue';
 import HelpDeskPanel      from './Pages/ERP/HelpDeskPanel.vue';
 import FiscalPanel        from './Pages/ERP/FiscalPanel.vue';
+import ErpLogin           from './Pages/ERP/Login.vue';
 
 const routes = [
   // ─── E-commerce (public) ─────────────────────────────
@@ -43,7 +44,8 @@ const routes = [
     meta: { requiresAuth: true },
   },
 
-  // ─── ERP internal (meta: erp) ────────────────────────
+  // ─── ERP login & internal (meta: erp) ────────────────
+  { path: '/erp/login',      component: ErpLogin,            name: 'erp.login' },
   { path: '/erp',            component: ErpDashboard,        name: 'erp.dashboard',   meta: { erp: true } },
   { path: '/erp/crm',        component: CRMDashboard,        name: 'erp.crm',         meta: { erp: true } },
   { path: '/erp/bi',         component: BIDashboard,         name: 'erp.bi',          meta: { erp: true } },
@@ -64,8 +66,20 @@ const router = createRouter({
 // Navigation guard
 router.beforeEach((to) => {
   const authStore = useAuthStore();
+  
+  // Set appropriate Authorization headers dynamically
+  authStore.setAuthForPath(to.path);
+
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
     return { name: 'login' };
+  }
+
+  if (to.meta.erp && !authStore.isErpLoggedIn) {
+    return { name: 'erp.login' };
+  }
+
+  if (to.name === 'erp.login' && authStore.isErpLoggedIn) {
+    return { name: 'erp.dashboard' };
   }
 });
 

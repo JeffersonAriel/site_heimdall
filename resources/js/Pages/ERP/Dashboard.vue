@@ -16,6 +16,14 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             Loja
           </router-link>
+
+          <div class="user-profile-menu" v-if="authStore.erpUser">
+            <span class="user-name">{{ authStore.erpUser.name }} ({{ authStore.erpUser.role }})</span>
+            <button @click="handleLogout" class="btn-logout" title="Sair do ERP">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
+          </div>
+
           <div class="notif-btn" @click="showNotifs = !showNotifs">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="notif-dot">{{ notifications.filter(n => !n.read).length }}</span>
@@ -106,6 +114,16 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '../../stores/auth';
+
+const authStore = useAuthStore();
+const router = useRouter();
+
+function handleLogout() {
+  authStore.erpLogout();
+  router.push('/erp/login');
+}
 
 /* ─── Notifications ─── */
 const showNotifs = ref(false);
@@ -238,6 +256,11 @@ const quickActions = ref([
 .nav-link { display: flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; background: #1e293b; border: 1px solid #334155; color: #94a3b8; font-size: .85rem; text-decoration: none; transition: all .2s; }
 .nav-link svg { width: 15px; height: 15px; }
 .nav-link:hover { color: #e2e8f0; border-color: #475569; }
+.user-profile-menu { display: flex; align-items: center; gap: 10px; background: #1e293b; border: 1px solid #334155; padding: 6px 12px; border-radius: 8px; font-size: 0.85rem; }
+.user-name { color: #cbd5e1; font-weight: 500; }
+.btn-logout { background: none; border: none; color: #f87171; cursor: pointer; display: flex; align-items: center; transition: color 0.2s; padding: 2px; }
+.btn-logout:hover { color: #f87171; opacity: 0.8; }
+.btn-logout svg { width: 16px; height: 16px; }
 .notif-btn { position: relative; width: 38px; height: 38px; border-radius: 10px; background: #1e293b; border: 1px solid #334155; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all .2s; }
 .notif-btn svg { width: 18px; height: 18px; color: #94a3b8; }
 .notif-btn:hover { border-color: #6366f1; }

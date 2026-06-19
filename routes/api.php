@@ -12,9 +12,10 @@ use App\Http\Controllers\Api\CustomerAuthController;
 
 // ---- Public routes ----
 
-// Customer Auth
+// Customer & ERP Auth
 Route::prefix('v1/auth')->group(function () {
     Route::post('/customer/login', [CustomerAuthController::class, 'login']);
+    Route::post('/erp/login', [\App\Http\Controllers\Api\ErpAuthController::class, 'login']);
 });
 
 // Products (public catalog)
@@ -38,10 +39,17 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::get('/customer/orders/{id}', [\Modules\Orders\Http\Controllers\OrdersController::class, 'show']);
 });
 
-// ---- Protected ERP routes (web auth) ----
+// ---- Protected ERP routes (Sanctum & User Check) ----
 Route::middleware('auth:sanctum')->prefix('v1/erp')->group(function () {
-    // Products management
-    Route::post('/products', [\Modules\Products\Http\Controllers\ProductsController::class, 'store']);
-    Route::put('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'update']);
-    Route::delete('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'destroy']);
+    Route::middleware(function ($request, $next) {
+        if (!($request->user() instanceof \App\Models\User)) {
+            return response()->json(['message' => 'Acesso negado. Apenas usuários do ERP.'], 403);
+        }
+        return $next($request);
+    })->group(function () {
+        // Products management
+        Route::post('/products', [\Modules\Products\Http\Controllers\ProductsController::class, 'store']);
+        Route::put('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'update']);
+        Route::delete('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'destroy']);
+    });
 });
