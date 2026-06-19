@@ -1,4 +1,4 @@
 ---
 deployment:
   tasks:
-    - /bin/bash $(pwd)/deploy.sh
+    - bash deploy.sh
