@@ -82,11 +82,11 @@ LOG_CHANNEL=stack
 LOG_LEVEL=error
 
 DB_CONNECTION=mysql
-DB_HOST={$dbHost}
-DB_PORT={$dbPort}
-DB_DATABASE={$dbName}
-DB_USERNAME={$dbUser}
-DB_PASSWORD={$dbPass}
+DB_HOST="{$dbHost}"
+DB_PORT="{$dbPort}"
+DB_DATABASE="{$dbName}"
+DB_USERNAME="{$dbUser}"
+DB_PASSWORD="{$dbPass}"
 
 BROADCAST_CONNECTION=log
 FILESYSTEM_DISK=local
