@@ -99,10 +99,36 @@ ENV;
 
         // Composer install (se vendor não existir)
         if (!is_dir($basePath . '/vendor')) {
+            $phpBin = PHP_BINARY;
             $composerBin = file_exists('/usr/local/bin/composer') ? '/usr/local/bin/composer' : 'composer';
-            $r = runCmd("{$composerBin} install --no-dev --optimize-autoloader --no-interaction", $basePath);
+            
+            // Tenta rodar usando o PHP atual para garantir a versão correta
+            $r = runCmd("{$phpBin} {$composerBin} install --no-dev --optimize-autoloader --no-interaction", $basePath);
+            
+            // Se falhar, tenta rodar o comando direto
+            if ($r['code'] !== 0) {
+                $r = runCmd("{$composerBin} install --no-dev --optimize-autoloader --no-interaction", $basePath);
+            }
+            
+            // Se ainda falhar, baixa o composer.phar localmente e executa
+            if ($r['code'] !== 0) {
+                $logs[] = ['label' => 'Aviso: Composer global falhou, tentando baixar composer.phar...', 'ok' => true, 'out' => $r['out']];
+                @copy('https://getcomposer.org/installer', $basePath . '/composer-setup.php');
+                if (file_exists($basePath . '/composer-setup.php')) {
+                    runCmd("{$phpBin} composer-setup.php --quiet", $basePath);
+                    @unlink($basePath . '/composer-setup.php');
+                }
+                
+                if (file_exists($basePath . '/composer.phar')) {
+                    $r = runCmd("{$phpBin} composer.phar install --no-dev --optimize-autoloader --no-interaction", $basePath);
+                    @unlink($basePath . '/composer.phar');
+                }
+            }
+            
             $logs[] = ['label' => 'composer install', 'ok' => $r['code'] === 0, 'out' => $r['out']];
         } else {
+            $logs[] = ['label' => 'composer install', 'ok' => true, 'out' => 'Vendor já existe — pulando.'];
+        }
             $logs[] = ['label' => 'composer install', 'ok' => true, 'out' => 'Vendor já existe — pulando.'];
         }
 
