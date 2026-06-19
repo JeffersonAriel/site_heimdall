@@ -126,10 +126,6 @@ ENV;
             }
             
             $logs[] = ['label' => 'composer install', 'ok' => $r['code'] === 0, 'out' => $r['out']];
-        } else {
-            $logs[] = ['label' => 'composer install', 'ok' => true, 'out' => 'Vendor já existe — pulando.'];
-        }
-            $logs[] = ['label' => 'composer install', 'ok' => true, 'out' => 'Vendor já existe — pulando.'];
         }
 
         // Migrations
