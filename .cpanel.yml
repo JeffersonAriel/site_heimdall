@@ -6,11 +6,12 @@ deployment:
     - /bin/cp "$APPPATH/public_html_index.php" "$PUBHTML/index.php"
     - /bin/cp "$APPPATH/public_html_htaccess" "$PUBHTML/.htaccess"
     - /bin/cp "$APPPATH/public/install.php" "$PUBHTML/install.php" 2>/dev/null || true
-    - /bin/cp -R "$APPPATH/public/build" "$PUBHTML/" 2>/dev/null || true
     - touch "$APPPATH/.env"
     - chmod 664 "$APPPATH/.env"
     - chmod -R 775 "$APPPATH/storage"
     - chmod -R 775 "$APPPATH/bootstrap/cache"
+    - /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction --working-dir="$APPPATH" 2>/dev/null || composer install --no-dev --optimize-autoloader --no-interaction --working-dir="$APPPATH" 2>/dev/null || true
+    - /bin/cp -R "$APPPATH/public/build" "$PUBHTML/" 2>/dev/null || true
     - /usr/local/bin/php "$APPPATH/artisan" config:clear 2>/dev/null || true
     - /usr/local/bin/php "$APPPATH/artisan" route:clear 2>/dev/null || true
     - /usr/local/bin/php "$APPPATH/artisan" view:clear 2>/dev/null || true
