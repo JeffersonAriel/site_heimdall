@@ -100,6 +100,16 @@ ENV;
         // Composer install (se vendor não existir)
         if (!is_dir($basePath . '/vendor')) {
             $phpBin = PHP_BINARY;
+            if (strpos(strtolower($phpBin), 'lsphp') !== false) {
+                $cliCandidate = str_replace('lsphp', 'php', $phpBin);
+                if (file_exists($cliCandidate)) {
+                    $phpBin = $cliCandidate;
+                } elseif (file_exists('/usr/bin/php')) {
+                    $phpBin = '/usr/bin/php';
+                } else {
+                    $phpBin = 'php';
+                }
+            }
             $composerBin = file_exists('/usr/local/bin/composer') ? '/usr/local/bin/composer' : 'composer';
             
             // Tenta rodar usando o PHP atual para garantir a versão correta, desativando register_argc_argv se necessário
