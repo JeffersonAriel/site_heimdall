@@ -41,6 +41,20 @@ $status = implode("\n", $statusOut);
 
 exec('git -C ' . escapeshellarg($repoPath ?? $homeDir) . ' log --oneline -5 2>&1', $logOut);
 $log = implode("\n", $logOut);
+
+// Ler o log do Laravel se existir
+$laravelLog = '';
+if ($repoPath && file_exists($repoPath . '/storage/logs/laravel.log')) {
+    $logLines = file($repoPath . '/storage/logs/laravel.log');
+    if ($logLines !== false) {
+        $lastLines = array_slice($logLines, -50);
+        $laravelLog = implode("", $lastLines);
+    } else {
+        $laravelLog = 'Não foi possível ler o arquivo laravel.log.';
+    }
+} else {
+    $laravelLog = 'Arquivo laravel.log não encontrado ou caminho incorreto.';
+}
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -76,6 +90,9 @@ $log = implode("\n", $logOut);
 <h2>✅ Resultado do Reset</h2>
 <pre class="ok"><?= htmlspecialchars($output) ?></pre>
 <?php endif; ?>
+
+<h2>📋 Laravel Log (Últimas 50 linhas)</h2>
+<pre><?= htmlspecialchars($laravelLog) ?></pre>
 
 <h2>🔧 Ações</h2>
 <p class="warn">⚠️ O reset vai apagar arquivos não-commitados (EXCETO .env e vendor)</p>
