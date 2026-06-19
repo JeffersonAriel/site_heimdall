@@ -10,10 +10,11 @@ echo "==> Deploy iniciado em: $APPPATH"
 echo "==> public_html: $PUBHTML"
 
 # --- Copiar bootstrap para public_html ---
-cp "$APPPATH/public_html_index.php" "$PUBHTML/index.php" && echo "OK: index.php copiado" || echo "WARN: falha ao copiar index.php"
-cp "$APPPATH/public_html_htaccess" "$PUBHTML/.htaccess" && echo "OK: .htaccess copiado" || echo "WARN: falha ao copiar .htaccess"
-cp "$APPPATH/public/install.php" "$PUBHTML/install.php" 2>/dev/null && echo "OK: install.php copiado" || true
-cp -R "$APPPATH/public/build" "$PUBHTML/" 2>/dev/null && echo "OK: build copiado" || true
+cp -f "$APPPATH/public_html_index.php" "$PUBHTML/index.php" && echo "OK: index.php copiado" || echo "WARN: falha ao copiar index.php"
+cp -f "$APPPATH/public_html_htaccess" "$PUBHTML/.htaccess" && echo "OK: .htaccess copiado" || echo "WARN: falha ao copiar .htaccess"
+cp -f "$APPPATH/public/install.php" "$PUBHTML/install.php" && echo "OK: install.php copiado" || echo "WARN: falha ao copiar install.php"
+cp -f "$APPPATH/gitfix.php" "$PUBHTML/gitfix.php" && echo "OK: gitfix.php copiado" || echo "WARN: falha ao copiar gitfix.php"
+cp -Rf "$APPPATH/public/build" "$PUBHTML/" && echo "OK: build copiado" || echo "WARN: falha ao copiar build"
 
 # --- Permissoes ---
 touch "$APPPATH/.env" && chmod 664 "$APPPATH/.env" && echo "OK: .env criado e permissao definida"
