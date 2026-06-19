@@ -1,0 +1,13 @@
+{
+    "Products": true,
+    "Stock": true,
+    "Orders": true,
+    "Financial": true,
+    "CRM": true,
+    "BI": true,
+    "AI": true,
+    "Production": true,
+    "HelpDesk": true,
+    "Fiscal": true,
+    "Notifications": true
+}
