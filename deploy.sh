@@ -21,14 +21,24 @@ chmod -R 775 "$APPPATH/storage" && echo "OK: storage 775"
 chmod -R 775 "$APPPATH/bootstrap/cache" && echo "OK: bootstrap/cache 775"
 
 # --- Composer install ---
-if [ -f /usr/local/bin/composer ]; then
-    echo "==> Rodando composer install..."
-    /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction --working-dir="$APPPATH" && echo "OK: composer install" || echo "WARN: composer install falhou"
-elif command -v composer &> /dev/null; then
-    echo "==> Rodando composer install (PATH)..."
-    composer install --no-dev --optimize-autoloader --no-interaction --working-dir="$APPPATH" && echo "OK: composer install" || echo "WARN: composer install falhou"
+COMPOSER_BIN=""
+for path in /usr/local/bin/composer /usr/bin/composer /opt/cpanel/ea-php82/root/usr/bin/composer; do
+    if [ -f "$path" ]; then COMPOSER_BIN="$path"; break; fi
+done
+if [ -z "$COMPOSER_BIN" ] && command -v composer &> /dev/null; then
+    COMPOSER_BIN="composer"
+fi
+
+if [ -n "$COMPOSER_BIN" ]; then
+    echo "==> Rodando composer: $COMPOSER_BIN"
+    $COMPOSER_BIN install --no-dev --optimize-autoloader --no-interaction --working-dir="$APPPATH" && echo "OK: composer install" || echo "WARN: composer install falhou"
 else
-    echo "WARN: composer nao encontrado"
+    echo "==> Composer nao encontrado, baixando..."
+    /usr/local/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    /usr/local/bin/php composer-setup.php --quiet
+    rm -f composer-setup.php
+    /usr/local/bin/php composer.phar install --no-dev --optimize-autoloader --no-interaction --working-dir="$APPPATH" && echo "OK: composer install" || echo "WARN: composer install falhou"
+    rm -f "$APPPATH/composer.phar"
 fi
 
 # --- Limpar caches do Laravel ---
