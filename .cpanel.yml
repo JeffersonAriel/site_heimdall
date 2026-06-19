@@ -1,8 +1,8 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/$(whoami)/public_html/
-    - /bin/cp -R * $DEPLOYPATH
-    - cd $DEPLOYPATH && php artisan config:clear
-    - cd $DEPLOYPATH && php artisan route:clear
-    - cd $DEPLOYPATH && php artisan view:clear
+    - export DEPLOYPATH=/home/$(whoami)/site_heimdall
+    - /usr/local/bin/php $DEPLOYPATH/artisan config:clear 2>/dev/null || true
+    - /usr/local/bin/php $DEPLOYPATH/artisan route:clear 2>/dev/null || true
+    - /usr/local/bin/php $DEPLOYPATH/artisan view:clear 2>/dev/null || true
+    - /usr/local/bin/php $DEPLOYPATH/artisan config:cache 2>/dev/null || true
