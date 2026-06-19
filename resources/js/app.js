@@ -16,7 +16,9 @@ app.use(router);
 const authStore = useAuthStore();
 authStore.init();
 
-// Axios base config
+// Axios base config — ensure all requests go to the correct subpath
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+axios.defaults.baseURL = base;
 axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 axios.defaults.withCredentials = true;
 
