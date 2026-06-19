@@ -47,7 +47,7 @@ $laravelLog = '';
 if ($repoPath && file_exists($repoPath . '/storage/logs/laravel.log')) {
     $logLines = file($repoPath . '/storage/logs/laravel.log');
     if ($logLines !== false) {
-        $lastLines = array_slice($logLines, -50);
+        $lastLines = array_slice($logLines, -300);
         $laravelLog = implode("", $lastLines);
     } else {
         $laravelLog = 'Não foi possível ler o arquivo laravel.log.';
