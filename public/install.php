@@ -102,8 +102,8 @@ ENV;
             $phpBin = PHP_BINARY;
             $composerBin = file_exists('/usr/local/bin/composer') ? '/usr/local/bin/composer' : 'composer';
             
-            // Tenta rodar usando o PHP atual para garantir a versão correta
-            $r = runCmd("{$phpBin} {$composerBin} install --no-dev --optimize-autoloader --no-interaction", $basePath);
+            // Tenta rodar usando o PHP atual para garantir a versão correta, desativando register_argc_argv se necessário
+            $r = runCmd("{$phpBin} -d register_argc_argv=Off {$composerBin} install --no-dev --optimize-autoloader --no-interaction", $basePath);
             
             // Se falhar, tenta rodar o comando direto
             if ($r['code'] !== 0) {
@@ -138,7 +138,7 @@ ENV;
                 }
                 
                 if (file_exists($dest)) {
-                    $r = runCmd("{$phpBin} composer.phar install --no-dev --optimize-autoloader --no-interaction", $basePath);
+                    $r = runCmd("{$phpBin} -d register_argc_argv=Off composer.phar install --no-dev --optimize-autoloader --no-interaction", $basePath);
                     @unlink($dest);
                 } else {
                     $r = ['code' => 99, 'out' => 'Erro: Nao foi possivel baixar o composer.phar por nenhum metodo (curl, wget, php-curl, copy).'];
