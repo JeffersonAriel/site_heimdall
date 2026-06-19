@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/$(whoami)/site_heimdall
+    - export DEPLOYPATH=$(pwd)
     - /usr/local/bin/php $DEPLOYPATH/artisan config:clear 2>/dev/null || true
     - /usr/local/bin/php $DEPLOYPATH/artisan route:clear 2>/dev/null || true
     - /usr/local/bin/php $DEPLOYPATH/artisan view:clear 2>/dev/null || true
