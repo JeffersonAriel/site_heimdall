@@ -113,8 +113,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
 import { useAuthStore } from '../../stores/auth';
 
 const authStore = useAuthStore();
@@ -127,18 +128,15 @@ function handleLogout() {
 
 /* ─── Notifications ─── */
 const showNotifs = ref(false);
-const notifications = ref([
-  { id:1, title:'⚠️ Estoque crítico: Cabo HDMI 2.1 2m (8 un)', type:'warning', time:'Há 5 min', read: false },
-  { id:2, title:'🛒 Novo pedido #9905 recebido — R$ 2.480,00', type:'info',    time:'Há 12 min', read: false },
-]);
+const notifications = ref([]);
 const markAllRead = () => notifications.value.forEach(n => n.read = true);
 
 /* ─── Welcome Stats ─── */
 const welcomeStats = ref([
-  { label: 'Pedidos Hoje',       value: '34',       color: '#6366f1' },
-  { label: 'Faturamento Mês',    value: 'R$ 142K',  color: '#10b981' },
-  { label: 'Tickets Abertos',    value: '2',         color: '#f59e0b' },
-  { label: 'Alertas de Estoque', value: '12',        color: '#ef4444' },
+  { label: 'Pedidos no Sistema',  value: '0',       color: '#6366f1' },
+  { label: 'Faturamento Total',   value: 'R$ 0.00',  color: '#10b981' },
+  { label: 'Tickets Abertos',     value: '0',         color: '#f59e0b' },
+  { label: 'Alertas de Estoque',  value: '0',        color: '#ef4444' },
 ]);
 
 /* ─── Modules ─── */
@@ -148,7 +146,7 @@ const modules = ref([
     desc: 'Funil Kanban, gestão de clientes e oportunidades de vendas.',
     path: '/erp/crm',
     accent: '#6366f1', accent2: '#8b5cf6',
-    stat: '3 leads quentes',
+    stat: 'Carregando...',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
   },
   {
@@ -156,7 +154,7 @@ const modules = ref([
     desc: 'Dashboards de faturamento, KPIs e relatórios analíticos em tempo real.',
     path: '/erp/bi',
     accent: '#0ea5e9', accent2: '#38bdf8',
-    stat: 'Atualizado há 5min',
+    stat: 'Carregando...',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
   },
   {
@@ -164,7 +162,8 @@ const modules = ref([
     desc: 'Contas a pagar/receber, fluxo de caixa e DRE consolidado.',
     path: '/erp/financeiro',
     accent: '#10b981', accent2: '#34d399',
-    alert: '1 vencendo hoje',
+    alert: null,
+    stat: 'Carregando...',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>`,
   },
   {
@@ -172,7 +171,8 @@ const modules = ref([
     desc: 'Depósitos, lotes, curva ABC e alertas de nível mínimo.',
     path: '/erp/estoque',
     accent: '#f59e0b', accent2: '#fbbf24',
-    alert: '12 críticos',
+    alert: null,
+    stat: 'Carregando...',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>`,
   },
   {
@@ -180,7 +180,7 @@ const modules = ref([
     desc: 'Fichas técnicas, ordens de produção e controle de BOM.',
     path: '/erp/producao',
     accent: '#ec4899', accent2: '#f472b6',
-    stat: '2 ordens abertas',
+    stat: 'Carregando...',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>`,
   },
   {
@@ -188,7 +188,8 @@ const modules = ref([
     desc: 'HelpDesk interno para atendimento de chamados de clientes.',
     path: '/erp/suporte',
     accent: '#a855f7', accent2: '#c084fc',
-    alert: '2 aguardando',
+    alert: null,
+    stat: 'Carregando...',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
   },
   {
@@ -196,7 +197,7 @@ const modules = ref([
     desc: 'Emissão, consulta e cancelamento de Notas Fiscais Eletrônicas.',
     path: '/erp/fiscal',
     accent: '#14b8a6', accent2: '#2dd4bf',
-    stat: '48 NFs emitidas',
+    stat: 'Carregando...',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`,
   },
   {
@@ -204,7 +205,7 @@ const modules = ref([
     desc: 'Auditoria inteligente, detecção de anomalias e recomendações automatizadas.',
     path: '/erp/ai',
     accent: '#6366f1', accent2: '#4f46e5',
-    stat: '3 anomalias detectadas',
+    stat: 'Carregando...',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
   },
   {
@@ -217,11 +218,106 @@ const modules = ref([
   }
 ]);
 
+const loadDashboardData = async () => {
+  try {
+    const [
+      resOrders,
+      resBi,
+      resTickets,
+      resNotifications,
+      resPayables,
+      resBoms,
+      resProductionOrders,
+      resInvoices,
+      resAiLogs
+    ] = await Promise.all([
+      axios.get('/api/v1/erp/orders').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/bi/kpis').catch(() => ({ data: { faturamento_total: 0, ticket_medio: 0, taxa_conversao: 0, estoque_critico: 0 } })),
+      axios.get('/api/v1/erp/helpdesk/tickets').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/notifications').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/financial/payables').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/production/boms').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/production/orders').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/fiscal/invoices').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/ai/logs').catch(() => ({ data: [] }))
+    ]);
+
+    // Update notifications
+    notifications.value = resNotifications.data.map(n => ({
+      id: n.id,
+      title: n.title,
+      type: n.type || 'info',
+      time: 'Recente',
+      read: !!n.read_at
+    })).slice(0, 5);
+
+    // Update Welcome Stats
+    const totalRevenue = resBi.data.faturamento_total || 0;
+    const criticalStock = resBi.data.estoque_critico || 0;
+    
+    welcomeStats.value = [
+      { label: 'Pedidos no Sistema', value: resOrders.data.length.toString(), color: '#6366f1' },
+      { label: 'Faturamento Total',  value: `R$ ${totalRevenue.toFixed(2)}`, color: '#10b981' },
+      { label: 'Tickets Abertos',    value: resTickets.data.filter(t => t.status === 'open').length.toString(), color: '#f59e0b' },
+      { label: 'Alertas de Estoque', value: criticalStock.toString(), color: '#ef4444' }
+    ];
+
+    // Count leads by fetching pipeline
+    const resPipeline = await axios.get('/api/v1/erp/crm/pipeline').catch(() => null);
+    let leadsCount = 0;
+    if (resPipeline && resPipeline.data && resPipeline.data.stages) {
+      resPipeline.data.stages.forEach(stage => {
+        if (stage.leads) leadsCount += stage.leads.length;
+      });
+    }
+
+    // Update Modules stats
+    modules.value = modules.value.map(mod => {
+      if (mod.name.includes('CRM')) {
+        return { ...mod, stat: `${leadsCount} leads ativos` };
+      }
+      if (mod.name.includes('BI')) {
+        return { ...mod, stat: 'Em tempo real' };
+      }
+      if (mod.name.includes('Financeiro')) {
+        const pendingPayables = resPayables.data.filter(p => p.status === 'pending').length;
+        return { ...mod, alert: pendingPayables > 0 ? `${pendingPayables} pendente(s)` : null, stat: pendingPayables === 0 ? 'Tudo pago' : null };
+      }
+      if (mod.name.includes('Estoque')) {
+        return { ...mod, alert: criticalStock > 0 ? `${criticalStock} itens críticos` : null, stat: criticalStock === 0 ? 'Estoque OK' : null };
+      }
+      if (mod.name.includes('Produção')) {
+        const openOps = resProductionOrders.data.filter(o => o.status !== 'completed').length;
+        return { ...mod, stat: `${openOps} ordens ativas` };
+      }
+      if (mod.name.includes('Suporte')) {
+        const openTickets = resTickets.data.filter(t => t.status === 'open').length;
+        return { ...mod, alert: openTickets > 0 ? `${openTickets} aguardando` : null, stat: openTickets === 0 ? 'Sem chamados' : null };
+      }
+      if (mod.name.includes('Fiscal')) {
+        return { ...mod, stat: `${resInvoices.data.length} NFs emitidas` };
+      }
+      if (mod.name.includes('Core AI')) {
+        const anomalies = resAiLogs.data.length;
+        return { ...mod, stat: `${anomalies} logs de auditoria` };
+      }
+      return mod;
+    });
+
+  } catch (err) {
+    console.error("Erro ao carregar dashboard principal", err);
+  }
+};
+
 const filteredModules = computed(() => {
   if (authStore.erpUser?.role !== 'admin') {
     return modules.value.filter(m => m.name !== 'Configurações');
   }
   return modules.value;
+});
+
+onMounted(() => {
+  loadDashboardData();
 });
 
 /* ─── Quick Actions ─── */

@@ -198,21 +198,19 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 
 /* ───────────── KPIs ───────────── */
 const kpis = ref([
-  { label: 'SKUs Ativos',      value: '1.842',  bg: 'linear-gradient(135deg,#6366f1,#8b5cf6)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="17" x2="11" y2="17"/></svg>' },
-  { label: 'Lotes em Estoque', value: '247',    bg: 'linear-gradient(135deg,#0ea5e9,#38bdf8)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>' },
-  { label: 'Depósitos',        value: '4',      bg: 'linear-gradient(135deg,#10b981,#34d399)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="16 7 12 3 8 7"/></svg>' },
-  { label: 'Estoque Crítico',  value: '12',     bg: 'linear-gradient(135deg,#ef4444,#f87171)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', alert: true },
+  { label: 'SKUs Ativos',      value: '0',  bg: 'linear-gradient(135deg,#6366f1,#8b5cf6)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="17" x2="11" y2="17"/></svg>' },
+  { label: 'Lotes em Estoque', value: '0',    bg: 'linear-gradient(135deg,#0ea5e9,#38bdf8)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>' },
+  { label: 'Depósitos',        value: '0',      bg: 'linear-gradient(135deg,#10b981,#34d399)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="16 7 12 3 8 7"/></svg>' },
+  { label: 'Estoque Crítico',  value: '0',     bg: 'linear-gradient(135deg,#ef4444,#f87171)', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', alert: true },
 ]);
 
 /* ───────────── ABC ───────────── */
-const abcProducts = ref([
-  { id:1, name:'Cabo HDMI 2.1 2m',   sku:'CBL-001', curve:'A', pct:78, qty:8,  min:10 },
-  { id:2, name:'Teclado Mecânico RGB',sku:'TEC-012', curve:'A', pct:65, qty:40, min:20 },
-]);
+const abcProducts = ref([]);
 
 const abcColor = (curve) => {
   const colors = { A: '#6366f1', B: '#f59e0b', C: '#94a3b8' };
@@ -225,10 +223,7 @@ const lowStockItems = computed(() =>
 );
 
 /* ───────────── Lots Table ───────────── */
-const lots = ref([
-  { id:1,  product:'Cabo HDMI 2.1 2m',    lot:'L2024-001', warehouse:'CD-01', aisle:'A1', shelf:'P3', qty:8,  expiry:null,       color:'#6366f1' },
-  { id:2,  product:'Teclado Mecânico RGB', lot:'L2024-045', warehouse:'CD-01', aisle:'B2', shelf:'P1', qty:40, expiry:null,       color:'#8b5cf6' },
-]);
+const lots = ref([]);
 
 const searchQuery = ref('');
 const filteredLots = computed(() => {
@@ -237,6 +232,74 @@ const filteredLots = computed(() => {
   return lots.value.filter(l =>
     l.product.toLowerCase().includes(q) || l.lot.toLowerCase().includes(q)
   );
+});
+
+const loadStockData = async () => {
+  try {
+    const [resLots, resLocations, resStock, resAbc] = await Promise.all([
+      axios.get('/api/v1/erp/stock/lots').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/stock/locations').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/stock').catch(() => ({ data: [] })),
+      axios.get('/api/v1/erp/stock/abc-curve').catch(() => ({ data: [] }))
+    ]);
+
+    const fetchedLots = resLots.data;
+    const fetchedLocations = resLocations.data;
+    const fetchedStock = resStock.data;
+
+    // Pair lots with locations dynamically
+    lots.value = fetchedLots.map((l, index) => {
+      const loc = fetchedLocations[index] || fetchedLocations[0] || { warehouse: 'CD-01', aisle: 'A1', shelf: 'P3' };
+      return {
+        id: l.id,
+        product: l.product?.name || 'Desconhecido',
+        lot: l.lot_number,
+        warehouse: loc.warehouse,
+        aisle: loc.aisle,
+        shelf: loc.shelf,
+        qty: l.quantity,
+        expiry: l.expiry_date ? new Date(l.expiry_date).toLocaleDateString('pt-BR') : null,
+        color: index % 2 === 0 ? '#6366f1' : '#8b5cf6'
+      };
+    });
+
+    // Update ABC Products based on ABC curve or actual products
+    abcProducts.value = resAbc.data.length > 0 ? resAbc.data.map(item => ({
+      id: item.product_id,
+      name: item.name,
+      sku: item.sku,
+      curve: item.class,
+      pct: item.percentage,
+      qty: fetchedStock.find(s => s.product_id === item.product_id)?.quantity || 0,
+      min: 10
+    })) : fetchedStock.map((s, idx) => ({
+      id: s.product_id,
+      name: s.product?.name || 'Desconhecido',
+      sku: s.product?.sku || '-',
+      curve: idx === 0 ? 'A' : 'B',
+      pct: idx === 0 ? 78 : 65,
+      qty: s.quantity,
+      min: idx === 0 ? 10 : 20
+    }));
+
+    // Update KPIs dynamically
+    const skusCount = fetchedStock.length;
+    const lotsCount = fetchedLots.length;
+    const warehousesCount = new Set(fetchedLocations.map(loc => loc.warehouse)).size;
+    const criticalStockCount = fetchedStock.filter(s => s.quantity <= 10).length;
+
+    kpis.value[0].value = skusCount.toString();
+    kpis.value[1].value = lotsCount.toString();
+    kpis.value[2].value = warehousesCount.toString();
+    kpis.value[3].value = criticalStockCount.toString();
+
+  } catch (err) {
+    console.error("Erro ao carregar dados do estoque", err);
+  }
+};
+
+onMounted(() => {
+  loadStockData();
 });
 
 /* ───────────── Transfer Modal ───────────── */

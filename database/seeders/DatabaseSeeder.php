@@ -115,6 +115,8 @@ class DatabaseSeeder extends Seeder
             'status' => 'paid',
         ]);
 
+        event(new \Modules\Orders\Events\OrderCreated($order));
+
         OrderItem::create([
             'order_id' => $order->id,
             'product_id' => $p1->id,

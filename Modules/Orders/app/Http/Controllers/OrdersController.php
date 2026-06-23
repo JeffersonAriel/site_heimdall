@@ -13,23 +13,28 @@ class OrdersController extends Controller
      */
     public function index(Request $request)
     {
-        $orders = Order::with('items.product')
-            ->where('customer_id', auth()->id())
-            ->latest()
-            ->get();
+        $query = Order::with(['items.product', 'customer']);
 
+        if (!($request->user() instanceof \App\Models\User)) {
+            $query->where('customer_id', $request->user()->id);
+        }
+
+        $orders = $query->latest()->get();
         return response()->json($orders);
     }
 
     /**
      * Show a single order.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
-        $order = Order::with('items.product')
-            ->where('customer_id', auth()->id())
-            ->findOrFail($id);
+        $query = Order::with(['items.product', 'customer']);
 
+        if (!($request->user() instanceof \App\Models\User)) {
+            $query->where('customer_id', $request->user()->id);
+        }
+
+        $order = $query->findOrFail($id);
         return response()->json($order);
     }
 }

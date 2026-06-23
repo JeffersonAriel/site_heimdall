@@ -17,6 +17,7 @@ return new class extends Migration
             $table->decimal('total', 10, 2);
             $table->enum('status', ['pending', 'paid', 'canceled', 'shipped'])->default('pending');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
