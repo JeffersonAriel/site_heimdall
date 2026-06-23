@@ -11,34 +11,34 @@
           Voltar ao ERP
         </router-link>
       </div>
-
+ 
       <!-- KPI Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         <div class="bg-gray-850 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col justify-between">
           <span class="text-xs text-gray-400 uppercase tracking-wider font-bold">Faturamento Total</span>
-          <h3 class="text-3xl font-bold text-teal-400 mt-2 font-mono">R$ {{ kpis.faturamento_total?.toFixed(2) }}</h3>
+          <h3 class="text-3xl font-bold text-teal-400 mt-2 font-mono">R$ {{ (kpis.faturamento_total || 0).toFixed(2) }}</h3>
           <p class="text-[10px] text-gray-500 mt-4 italic">Origem: Métricas de Vendas</p>
         </div>
-
+ 
         <div class="bg-gray-850 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col justify-between">
           <span class="text-xs text-gray-400 uppercase tracking-wider font-bold">Ticket Médio</span>
-          <h3 class="text-3xl font-bold text-cyan-400 mt-2 font-mono">R$ {{ kpis.ticket_medio?.toFixed(2) }}</h3>
+          <h3 class="text-3xl font-bold text-cyan-400 mt-2 font-mono">R$ {{ (kpis.ticket_medio || 0).toFixed(2) }}</h3>
           <p class="text-[10px] text-gray-500 mt-4 italic">Calculado por Pedido ativo</p>
         </div>
-
+ 
         <div class="bg-gray-850 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col justify-between">
           <span class="text-xs text-gray-400 uppercase tracking-wider font-bold">Taxa de Conversão</span>
-          <h3 class="text-3xl font-bold text-purple-400 mt-2 font-mono">{{ kpis.taxa_conversao?.toFixed(1) }}%</h3>
+          <h3 class="text-3xl font-bold text-purple-400 mt-2 font-mono">{{ (kpis.taxa_conversao || 0).toFixed(1) }}%</h3>
           <p class="text-[10px] text-gray-500 mt-4 italic">Pedidos / Clientes Ativos</p>
         </div>
-
+ 
         <div class="bg-gray-850 p-6 rounded-xl border border-gray-700 shadow-lg flex flex-col justify-between">
           <span class="text-xs text-gray-400 uppercase tracking-wider font-bold">Alertas de Estoque Crítico</span>
-          <h3 class="text-3xl font-bold text-rose-500 mt-2 font-mono">{{ kpis.estoque_critico }}</h3>
+          <h3 class="text-3xl font-bold text-rose-500 mt-2 font-mono">{{ kpis.estoque_critico || 0 }}</h3>
           <p class="text-[10px] text-gray-500 mt-4 italic">Produtos abaixo do limite de segurança</p>
         </div>
       </div>
-
+ 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <!-- Top Products Sold -->
         <div class="bg-gray-850 p-6 rounded-xl border border-gray-700 shadow-lg">
@@ -50,10 +50,10 @@
             <div v-for="item in topProducts" :key="item.product_id" class="flex items-center justify-between p-3 bg-gray-800 rounded-lg border border-gray-700/50">
               <div>
                 <span class="font-bold text-gray-200 text-sm">{{ item.product?.name || `Produto ID ${item.product_id}` }}</span>
-                <p class="text-xs text-gray-400">Total Unidades Vendidas: <strong class="text-gray-300 font-mono">{{ item.total_qty }}</strong></p>
+                <p class="text-xs text-gray-400">Total Unidades Vendidas: <strong class="text-gray-300 font-mono">{{ item.total_qty || 0 }}</strong></p>
               </div>
               <div class="text-right">
-                <span class="text-sm font-bold text-teal-400 font-mono">R$ {{ parseFloat(item.total_revenue).toFixed(2) }}</span>
+                <span class="text-sm font-bold text-teal-400 font-mono">R$ {{ parseFloat(item.total_revenue || 0).toFixed(2) }}</span>
               </div>
             </div>
             <div v-if="topProducts.length === 0" class="text-center py-8 text-gray-500 text-sm italic">
@@ -61,7 +61,7 @@
             </div>
           </div>
         </div>
-
+ 
         <!-- Revenue Progression -->
         <div class="bg-gray-850 p-6 rounded-xl border border-gray-700 shadow-lg">
           <h2 class="text-lg font-bold text-gray-100 mb-4 flex items-center gap-2">
@@ -70,12 +70,12 @@
           </h2>
           <div class="space-y-4">
             <div v-for="day in revenueHistory" :key="day.date" class="flex items-center justify-between p-3 bg-gray-800 rounded-lg border border-gray-700/50">
-              <span class="text-xs text-gray-300 font-mono">{{ day.date }}</span>
+              <span class="text-xs text-gray-300 font-mono">{{ day.date || '-' }}</span>
               <div class="flex items-center gap-4">
                 <div class="w-32 bg-gray-700 rounded-full h-1.5 overflow-hidden">
-                  <div class="bg-cyan-500 h-1.5" :style="{ width: `${Math.min((day.total / (kpis.faturamento_total || 1)) * 100, 100)}%` }"></div>
+                  <div class="bg-cyan-500 h-1.5" :style="{ width: `${Math.min(((day.total || 0) / (kpis.faturamento_total || 1)) * 100, 100)}%` }"></div>
                 </div>
-                <span class="text-sm font-bold text-cyan-400 font-mono">R$ {{ parseFloat(day.total).toFixed(2) }}</span>
+                <span class="text-sm font-bold text-cyan-400 font-mono">R$ {{ parseFloat(day.total || 0).toFixed(2) }}</span>
               </div>
             </div>
             <div v-if="revenueHistory.length === 0" class="text-center py-8 text-gray-500 text-sm italic">
@@ -84,15 +84,15 @@
           </div>
         </div>
       </div>
-
+ 
     </div>
   </div>
 </template>
-
+ 
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-
+ 
 const kpis = ref({
   faturamento_total: 0,
   ticket_medio: 0,
@@ -101,28 +101,31 @@ const kpis = ref({
 });
 const topProducts = ref([]);
 const revenueHistory = ref([]);
-
+ 
 const loadData = async () => {
   try {
     const kpiRes = await axios.get('/api/v1/erp/bi/kpis');
-    kpis.value = kpiRes.data;
-
+    kpis.value = kpiRes.data && typeof kpiRes.data === 'object' ? kpiRes.data : { faturamento_total: 0, ticket_medio: 0, taxa_conversao: 0, estoque_critico: 0 };
+ 
     const topRes = await axios.get('/api/v1/erp/bi/top-products');
-    topProducts.value = topRes.data;
-
+    topProducts.value = Array.isArray(topRes.data) ? topRes.data : [];
+ 
     const revRes = await axios.get('/api/v1/erp/bi/revenue-period');
-    revenueHistory.value = revRes.data;
+    revenueHistory.value = Array.isArray(revRes.data) ? revRes.data : [];
   } catch (err) {
     console.error("Erro ao carregar dados do BI", err);
   }
 };
-
+ 
 onMounted(() => {
   loadData();
 });
 </script>
-
+ 
 <style scoped>
+.bg-gray-855 {
+  background-color: #1A222F;
+}
 .bg-gray-850 {
   background-color: #1F2937;
 }

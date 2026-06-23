@@ -91,7 +91,7 @@ const orderIdToIssue = ref('');
 const loadInvoices = async () => {
   try {
     const res = await axios.get('/api/v1/erp/fiscal/invoices');
-    invoices.value = res.data;
+    invoices.value = Array.isArray(res.data) ? res.data : [];
   } catch (err) {
     console.error("Erro ao carregar notas", err);
   }

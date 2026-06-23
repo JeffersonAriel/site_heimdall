@@ -226,10 +226,10 @@ const newOrder = ref({
 const loadData = async () => {
   try {
     const resBoms = await axios.get('/api/v1/erp/production/boms');
-    boms.value = resBoms.data;
+    boms.value = Array.isArray(resBoms.data) ? resBoms.data : [];
 
     const resOrders = await axios.get('/api/v1/erp/production/orders');
-    orders.value = resOrders.data;
+    orders.value = Array.isArray(resOrders.data) ? resOrders.data : [];
 
     const resProducts = await axios.get('/api/v1/erp/crm/pipeline'); // reuse logic/products fetch or mock it
     const resProdList = await axios.get('/api/v1/bi/sales').catch(() => null); // get products

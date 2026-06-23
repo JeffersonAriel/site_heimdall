@@ -76,7 +76,7 @@ const logs = ref([]);
 const loadConfig = async () => {
   try {
     const res = await axios.get('/api/v1/erp/ai/config');
-    aiEnabled.value = res.data.enabled;
+    aiEnabled.value = res.data && typeof res.data === 'object' ? !!res.data.enabled : false;
   } catch (err) {
     console.error("Erro ao carregar configurações de IA", err);
   }
@@ -85,7 +85,7 @@ const loadConfig = async () => {
 const loadLogs = async () => {
   try {
     const res = await axios.get('/api/v1/erp/ai/logs');
-    logs.value = res.data;
+    logs.value = Array.isArray(res.data) ? res.data : [];
   } catch (err) {
     console.error("Erro ao carregar logs de IA", err);
   }
@@ -96,7 +96,7 @@ const toggleAi = async () => {
     const res = await axios.post('/api/v1/erp/ai/config', {
       enabled: !aiEnabled.value
     });
-    aiEnabled.value = res.data.enabled;
+    aiEnabled.value = res.data && typeof res.data === 'object' ? !!res.data.enabled : false;
   } catch (err) {
     console.error("Erro ao atualizar configuração de IA", err);
   }

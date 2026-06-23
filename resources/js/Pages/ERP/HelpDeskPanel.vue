@@ -124,7 +124,7 @@ const replyMessage = ref('');
 const loadTickets = async () => {
   try {
     const res = await axios.get('/api/v1/erp/helpdesk/tickets');
-    tickets.value = res.data;
+    tickets.value = Array.isArray(res.data) ? res.data : [];
     if (selectedTicketId.value) {
       selectTicket(selectedTicketId.value);
     }
@@ -137,7 +137,7 @@ const selectTicket = async (id) => {
   try {
     selectedTicketId.value = id;
     const res = await axios.get(`/api/v1/erp/helpdesk/tickets/${id}`);
-    selectedTicket.value = res.data;
+    selectedTicket.value = res.data && typeof res.data === 'object' ? res.data : null;
   } catch (err) {
     console.error("Erro ao carregar conversa do ticket", err);
   }

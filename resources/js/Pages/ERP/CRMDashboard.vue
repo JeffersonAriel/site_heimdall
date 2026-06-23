@@ -226,7 +226,7 @@ const allLeads = computed(() => {
 const loadPipeline = async () => {
   try {
     const res = await axios.get('/api/v1/erp/crm/pipeline');
-    pipeline.value = res.data;
+    pipeline.value = res.data && typeof res.data === 'object' ? res.data : { stages: [] };
     if (allLeads.value.length > 0 && !newActivity.value.lead_id) {
       newActivity.value.lead_id = allLeads.value[0].id;
     }
@@ -238,7 +238,7 @@ const loadPipeline = async () => {
 const loadActivities = async () => {
   try {
     const res = await axios.get('/api/v1/erp/crm/activities');
-    activities.value = res.data;
+    activities.value = Array.isArray(res.data) ? res.data : [];
   } catch (err) {
     console.error("Erro ao carregar atividades", err);
   }
