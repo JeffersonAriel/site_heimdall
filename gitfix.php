@@ -36,6 +36,12 @@ if ($repoPath && $action === 'reset') {
 }
 
 if ($repoPath && $action === 'migrate') {
+    $dbFile = $repoPath . '/database/database.sqlite';
+    if (!file_exists($dbFile)) {
+        @touch($dbFile);
+        @chmod($dbFile, 0666);
+        $output .= "Criado arquivo de banco de dados SQLite em: $dbFile\n\n";
+    }
     $cmds = [
         'php ' . escapeshellarg($repoPath . '/artisan') . ' migrate --force',
     ];
