@@ -22,6 +22,7 @@ import ProductionDashboard from './Pages/ERP/ProductionDashboard.vue';
 import HelpDeskPanel      from './Pages/ERP/HelpDeskPanel.vue';
 import FiscalPanel        from './Pages/ERP/FiscalPanel.vue';
 import ErpLogin           from './Pages/ERP/Login.vue';
+import Settings           from './Pages/ERP/Settings.vue';
 
 const routes = [
   // ─── E-commerce (public) ─────────────────────────────
@@ -55,6 +56,7 @@ const routes = [
   { path: '/erp/producao',   component: ProductionDashboard, name: 'erp.production',  meta: { erp: true } },
   { path: '/erp/suporte',    component: HelpDeskPanel,       name: 'erp.helpdesk',    meta: { erp: true } },
   { path: '/erp/fiscal',     component: FiscalPanel,         name: 'erp.fiscal',      meta: { erp: true } },
+  { path: '/erp/configuracoes', component: Settings,         name: 'erp.settings',    meta: { erp: true } },
 ];
 
 const routerBase = window.location.pathname.startsWith('/~jeff2892') ? '/~jeff2892/' : '/';

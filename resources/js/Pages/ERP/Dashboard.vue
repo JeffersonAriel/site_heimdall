@@ -74,7 +74,7 @@
       <div class="section-label">Módulos Principais</div>
       <div class="modules-grid">
         <router-link
-          v-for="mod in modules"
+          v-for="mod in filteredModules"
           :key="mod.name"
           :to="mod.path"
           class="mod-card"
@@ -113,7 +113,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '../../stores/auth';
 
@@ -207,7 +207,22 @@ const modules = ref([
     stat: '3 anomalias detectadas',
     icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`,
   },
+  {
+    name: 'Configurações',
+    desc: 'Controle de acessos, cadastro de operadores e privilégios de permissões.',
+    path: '/erp/configuracoes',
+    accent: '#64748b', accent2: '#475569',
+    stat: 'Usuários e Cargos',
+    icon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`,
+  }
 ]);
+
+const filteredModules = computed(() => {
+  if (authStore.erpUser?.role !== 'admin') {
+    return modules.value.filter(m => m.name !== 'Configurações');
+  }
+  return modules.value;
+});
 
 /* ─── Quick Actions ─── */
 const quickActions = ref([

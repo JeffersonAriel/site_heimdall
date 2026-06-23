@@ -45,4 +45,11 @@ Route::middleware(['auth:sanctum', 'erp.user'])->prefix('v1/erp')->group(functio
     Route::post('/products', [\Modules\Products\Http\Controllers\ProductsController::class, 'store']);
     Route::put('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'update']);
     Route::delete('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'destroy']);
+
+    // User & Permissions management
+    Route::get('/users', [\App\Http\Controllers\Api\ErpUserController::class, 'index']);
+    Route::post('/users', [\App\Http\Controllers\Api\ErpUserController::class, 'store']);
+    Route::put('/users/{id}', [\App\Http\Controllers\Api\ErpUserController::class, 'update']);
+    Route::delete('/users/{id}', [\App\Http\Controllers\Api\ErpUserController::class, 'destroy']);
+    Route::get('/permissions', [\App\Http\Controllers\Api\ErpUserController::class, 'permissions']);
 });
