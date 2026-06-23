@@ -16,6 +16,19 @@ app.use(router);
 const authStore = useAuthStore();
 authStore.init();
 
+// Intercept 401 responses to logout and redirect
+axios.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response && error.response.status === 401) {
+      authStore.erpLogout();
+      authStore.logout();
+      router.push('/erp/login');
+    }
+    return Promise.reject(error);
+  }
+);
+
 // Axios base config is handled in bootstrap.js
 axios.defaults.withCredentials = true;
 

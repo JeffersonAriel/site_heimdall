@@ -11,7 +11,49 @@
         </router-link>
       </div>
 
+      <!-- Treasury Summary Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 p-5 rounded-2xl border border-emerald-500/30 shadow-lg flex flex-col justify-between">
+          <span class="text-xs text-emerald-400 uppercase tracking-wider font-bold">Disponível em Caixa/Bancos</span>
+          <h3 class="text-3xl font-extrabold text-emerald-300 mt-2 font-mono">
+            R$ {{ totalCash.toFixed(2) }}
+          </h3>
+          <p class="text-[10px] text-gray-400 mt-3">Soma de todas as contas ativas</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-blue-950/60 to-slate-900 p-5 rounded-2xl border border-blue-500/30 shadow-lg flex flex-col justify-between">
+          <span class="text-xs text-blue-400 uppercase tracking-wider font-bold">Contas a Receber (Pendente)</span>
+          <h3 class="text-3xl font-extrabold text-blue-300 mt-2 font-mono">
+            R$ {{ totalReceivables.toFixed(2) }}
+          </h3>
+          <p class="text-[10px] text-gray-400 mt-3">Previsão de entradas futuras</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-red-950/60 to-slate-900 p-5 rounded-2xl border border-red-500/30 shadow-lg flex flex-col justify-between">
+          <span class="text-xs text-red-400 uppercase tracking-wider font-bold">Contas a Pagar (Pendente)</span>
+          <h3 class="text-3xl font-extrabold text-red-300 mt-2 font-mono">
+            R$ {{ totalPayables.toFixed(2) }}
+          </h3>
+          <p class="text-[10px] text-gray-400 mt-3">Compromissos financeiros futuros</p>
+        </div>
+
+        <div class="bg-gradient-to-br from-purple-950/60 to-slate-900 p-5 rounded-2xl border border-purple-500/30 shadow-lg flex flex-col justify-between">
+          <span class="text-xs text-purple-400 uppercase tracking-wider font-bold">Saldo Projetado</span>
+          <h3 class="text-3xl font-extrabold text-purple-300 mt-2 font-mono">
+            R$ {{ projectedBalance.toFixed(2) }}
+          </h3>
+          <p class="text-[10px] text-gray-400 mt-3">Disponível + Recebíveis - Contas a Pagar</p>
+        </div>
+      </div>
+
       <!-- Financial Accounts Widget -->
+      <div class="mb-6 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-gray-200 flex items-center gap-2">
+          <span class="w-2.5 h-5 bg-teal-500 rounded-full"></span>
+          Contas & Saldos Individuais
+        </h2>
+      </div>
+
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
         <div v-for="acc in accounts" :key="acc.id" class="bg-gray-850 p-5 rounded-xl border border-gray-700 flex flex-col justify-between">
           <div>
@@ -232,7 +274,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 
 const accounts = ref([]);
@@ -251,26 +293,46 @@ const newAccount = ref({ name: '', type: 'bank', balance: 0 });
 const receiptDetails = ref({ financial_account_id: '' });
 const paymentDetails = ref({ financial_account_id: '' });
 
+// Computed Metrics for treasury summary
+const totalCash = computed(() => {
+  if (!Array.isArray(accounts.value)) return 0;
+  return accounts.value.reduce((sum, acc) => sum + parseFloat(acc.balance || 0), 0);
+});
+
+const totalReceivables = computed(() => {
+  if (!Array.isArray(receivables.value)) return 0;
+  return receivables.value.filter(r => r.status === 'pending').reduce((sum, r) => sum + parseFloat(r.amount || 0), 0);
+});
+
+const totalPayables = computed(() => {
+  if (!Array.isArray(payables.value)) return 0;
+  return payables.value.filter(p => p.status === 'pending').reduce((sum, p) => sum + parseFloat(p.amount || 0), 0);
+});
+
+const projectedBalance = computed(() => {
+  return totalCash.value + totalReceivables.value - totalPayables.value;
+});
+
 const loadData = async () => {
   try {
     const resAccs = await axios.get('/api/v1/erp/financial/accounts');
-    accounts.value = resAccs.data;
+    accounts.value = Array.isArray(resAccs.data) ? resAccs.data : [];
     if (accounts.value.length > 0) {
       receiptDetails.value.financial_account_id = accounts.value[0].id;
       paymentDetails.value.financial_account_id = accounts.value[0].id;
     }
 
     const resCf = await axios.get('/api/v1/erp/financial/cashflow');
-    cashflow.value = resCf.data;
+    cashflow.value = Array.isArray(resCf.data) ? resCf.data : [];
 
     const resDre = await axios.get('/api/v1/erp/financial/dre');
-    dreData.value = resDre.data;
+    dreData.value = resDre.data && typeof resDre.data === 'object' ? resDre.data : {};
 
     const resRecs = await axios.get('/api/v1/erp/financial/receivables');
-    receivables.value = resRecs.data;
+    receivables.value = Array.isArray(resRecs.data) ? resRecs.data : [];
 
     const resPays = await axios.get('/api/v1/erp/financial/payables');
-    payables.value = resPays.data;
+    payables.value = Array.isArray(resPays.data) ? resPays.data : [];
   } catch (err) {
     console.error("Erro ao carregar dados financeiros", err);
   }
