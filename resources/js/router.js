@@ -57,8 +57,10 @@ const routes = [
   { path: '/erp/fiscal',     component: FiscalPanel,         name: 'erp.fiscal',      meta: { erp: true } },
 ];
 
+const routerBase = window.location.pathname.startsWith('/~jeff2892') ? '/~jeff2892/' : '/';
+
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  history: createWebHistory(routerBase),
   routes,
   scrollBehavior: () => ({ top: 0 }),
 });
