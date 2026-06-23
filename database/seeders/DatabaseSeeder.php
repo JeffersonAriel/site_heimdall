@@ -184,5 +184,83 @@ class DatabaseSeeder extends Seeder
             'type' => 'warning',
             'read_at' => null,
         ]);
+
+        // 11. CRM Seeds (Funil, 2 Leads e 2 Atividades)
+        $pipeline = \Modules\CRM\Models\Pipeline::firstOrCreate(['name' => 'Funil de Vendas Padrão']);
+        $stages = [
+            ['name' => 'Novo Lead', 'order_position' => 1, 'color' => '#3B82F6'],
+            ['name' => 'Contato Realizado', 'order_position' => 2, 'color' => '#F59E0B'],
+            ['name' => 'Proposta Enviada', 'order_position' => 3, 'color' => '#8B5CF6'],
+            ['name' => 'Negócio Fechado', 'order_position' => 4, 'color' => '#10B981'],
+            ['name' => 'Negócio Perdido', 'order_position' => 5, 'color' => '#EF4444'],
+        ];
+        
+        $stageModels = [];
+        foreach ($stages as $stage) {
+            $stageModels[] = \Modules\CRM\Models\PipelineStage::firstOrCreate(
+                ['pipeline_id' => $pipeline->id, 'name' => $stage['name']],
+                ['order_position' => $stage['order_position'], 'color' => $stage['color']]
+            );
+        }
+
+        $lead1 = \Modules\CRM\Models\Lead::firstOrCreate(
+            ['email' => 'roberto@empresa.com'],
+            [
+                'name' => 'Roberto Santos',
+                'phone' => '11988888888',
+                'source' => 'Busca Google',
+                'status' => 'new',
+                'pipeline_stage_id' => $stageModels[0]->id,
+            ]
+        );
+        $lead2 = \Modules\CRM\Models\Lead::firstOrCreate(
+            ['email' => 'patricia@loja.com'],
+            [
+                'name' => 'Patrícia Lima',
+                'phone' => '11977777777',
+                'source' => 'Indicação',
+                'status' => 'contacted',
+                'pipeline_stage_id' => $stageModels[1]->id,
+            ]
+        );
+
+        \Modules\CRM\Models\Activity::firstOrCreate(
+            ['lead_id' => $lead1->id, 'title' => 'Telefonar para Roberto'],
+            [
+                'type' => 'call',
+                'description' => 'Apresentar catálogo técnico do ERP.',
+                'due_at' => now()->addDays(1),
+            ]
+        );
+        \Modules\CRM\Models\Activity::firstOrCreate(
+            ['lead_id' => $lead2->id, 'title' => 'Enviar proposta com PDF comercial'],
+            [
+                'type' => 'email',
+                'description' => 'Montar orçamento customizado de atacado.',
+                'due_at' => now()->addDays(2),
+            ]
+        );
+
+        // 12. HelpDesk Seeds (2 Tickets de exemplo)
+        \Modules\HelpDesk\Models\Ticket::firstOrCreate(
+            ['subject' => 'Dificuldade no checkout da loja'],
+            [
+                'customer_id' => $customer->id,
+                'category' => 'financeiro',
+                'status' => 'open',
+                'priority' => 'high',
+                'description' => 'Não estou conseguindo finalizar o pagamento usando cartão de crédito, aparece erro interno.',
+            ]
+        );
+        \Modules\HelpDesk\Models\Ticket::firstOrCreate(
+            ['subject' => 'Rastreamento do pedido #102'],
+            [
+                'customer_id' => $customer->id,
+                'category' => 'logistica',
+                'status' => 'answered',
+                'priority' => 'medium',
+                'description' => 'O código de rastreamento enviado ainda não consta no sistema dos Correios.',
+            ]
+        );
     }
 }

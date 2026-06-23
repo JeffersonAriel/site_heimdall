@@ -63,6 +63,17 @@ if ($repoPath && $action === 'seed') {
     }
 }
 
+if ($repoPath && $action === 'fresh') {
+    $cmds = [
+        'php ' . escapeshellarg($repoPath . '/artisan') . ' migrate:fresh --seed --force',
+    ];
+    foreach ($cmds as $cmd) {
+        exec($cmd . ' 2>&1', $out, $code);
+        $output .= "$ $cmd\n" . implode("\n", $out) . "\nExit: $code\n\n";
+        $out = [];
+    }
+}
+
 // Status atual
 exec('git -C ' . escapeshellarg($repoPath ?? $homeDir) . ' status 2>&1', $statusOut);
 $status = implode("\n", $statusOut);
@@ -127,6 +138,7 @@ if ($repoPath && file_exists($repoPath . '/storage/logs/laravel.log')) {
 <a href="?action=reset" onclick="return confirm('Confirma reset do repositório?')">🔄 Executar git reset --hard + clean</a>
 <a href="?action=migrate" onclick="return confirm('Confirma execução de php artisan migrate --force?')">⚙️ Rodar Migrations (Artisan)</a>
 <a href="?action=seed" onclick="return confirm('Confirma execução de php artisan db:seed --force?')">🌱 Popular Banco (Seed)</a>
+<a href="?action=fresh" onclick="return confirm('ATENÇÃO: Isso apagará TODOS os dados atuais do banco no servidor e re-populará com apenas os 2 exemplos. Confirma?')">💥 Reset Total do Banco (Fresh + Seed)</a>
 <a href="?action=status">🔃 Atualizar Status</a>
 
 <?php endif; ?>
