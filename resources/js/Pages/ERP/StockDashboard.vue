@@ -212,10 +212,6 @@ const kpis = ref([
 const abcProducts = ref([
   { id:1, name:'Cabo HDMI 2.1 2m',   sku:'CBL-001', curve:'A', pct:78, qty:8,  min:10 },
   { id:2, name:'Teclado Mecânico RGB',sku:'TEC-012', curve:'A', pct:65, qty:40, min:20 },
-  { id:3, name:'Monitor 27" IPS',     sku:'MON-008', curve:'B', pct:42, qty:12, min:5  },
-  { id:4, name:'Hub USB-C 7-em-1',    sku:'HUB-034', curve:'B', pct:38, qty:4,  min:8  },
-  { id:5, name:'Mouse Pad XL',        sku:'MSP-019', curve:'C', pct:15, qty:85, min:30 },
-  { id:6, name:'Webcam Full HD',      sku:'WEB-005', curve:'C', pct:10, qty:3,  min:5  },
 ]);
 
 const abcColor = (curve) => {
@@ -232,12 +228,6 @@ const lowStockItems = computed(() =>
 const lots = ref([
   { id:1,  product:'Cabo HDMI 2.1 2m',    lot:'L2024-001', warehouse:'CD-01', aisle:'A1', shelf:'P3', qty:8,  expiry:null,       color:'#6366f1' },
   { id:2,  product:'Teclado Mecânico RGB', lot:'L2024-045', warehouse:'CD-01', aisle:'B2', shelf:'P1', qty:40, expiry:null,       color:'#8b5cf6' },
-  { id:3,  product:'Monitor 27" IPS',      lot:'L2024-112', warehouse:'CD-02', aisle:'A3', shelf:'P2', qty:12, expiry:null,       color:'#0ea5e9' },
-  { id:4,  product:'Hub USB-C 7-em-1',     lot:'L2024-089', warehouse:'CD-02', aisle:'C1', shelf:'P4', qty:4,  expiry:null,       color:'#f59e0b' },
-  { id:5,  product:'Mouse Pad XL',         lot:'L2024-220', warehouse:'CD-03', aisle:'D2', shelf:'P1', qty:85, expiry:null,       color:'#10b981' },
-  { id:6,  product:'Webcam Full HD',        lot:'L2024-067', warehouse:'CD-01', aisle:'B3', shelf:'P2', qty:3,  expiry:null,       color:'#ef4444' },
-  { id:7,  product:'SSD NVMe 1TB',         lot:'L2024-301', warehouse:'CD-04', aisle:'A1', shelf:'P1', qty:22, expiry:null,       color:'#ec4899' },
-  { id:8,  product:'Leite UHT Integral',   lot:'L2024-554', warehouse:'CD-03', aisle:'E1', shelf:'P5', qty:200,expiry:'2025-03-15',color:'#f97316' },
 ]);
 
 const searchQuery = ref('');

@@ -54,7 +54,7 @@ class DatabaseSeeder extends Seeder
         // Rodar Feature Flags
         $this->call(FeatureFlagSeeder::class);
 
-        // 3. Cadastrar Produtos
+        // 3. Cadastrar Produtos (Máximo 2)
         $p1 = Product::updateOrCreate(
             ['sku' => 'CBL-001'],
             ['name' => 'Cabo HDMI 2.1 2m', 'price' => 89.90, 'cost' => 35.00, 'stock_control' => true, 'status' => 'active']
@@ -62,18 +62,6 @@ class DatabaseSeeder extends Seeder
         $p2 = Product::updateOrCreate(
             ['sku' => 'TEC-012'],
             ['name' => 'Teclado Mecânico RGB', 'price' => 349.90, 'cost' => 150.00, 'stock_control' => true, 'status' => 'active']
-        );
-        $p3 = Product::updateOrCreate(
-            ['sku' => 'MON-008'],
-            ['name' => 'Monitor 27" IPS', 'price' => 1299.00, 'cost' => 700.00, 'stock_control' => true, 'status' => 'active']
-        );
-        $p4 = Product::updateOrCreate(
-            ['sku' => 'HUB-034'],
-            ['name' => 'Hub USB-C 7-em-1', 'price' => 189.90, 'cost' => 80.00, 'stock_control' => true, 'status' => 'active']
-        );
-        $p5 = Product::updateOrCreate(
-            ['sku' => 'MSP-019'],
-            ['name' => 'Mouse Pad XL', 'price' => 79.90, 'cost' => 25.00, 'stock_control' => true, 'status' => 'active']
         );
 
         // 4. Cadastrar Itens de Estoque e Localizações
@@ -84,14 +72,14 @@ class DatabaseSeeder extends Seeder
             ['warehouse' => 'CD-02', 'aisle' => 'B2', 'shelf' => 'P1', 'position' => 'G2']
         );
 
-        foreach ([$p1, $p2, $p3, $p4, $p5] as $p) {
+        foreach ([$p1, $p2] as $p) {
             StockItem::updateOrCreate(
                 ['product_id' => $p->id],
                 ['quantity' => 50]
             );
         }
 
-        // Criar Lotes de Estoque
+        // Criar Lotes de Estoque (Máximo 2)
         StockLot::updateOrCreate(
             ['product_id' => $p1->id, 'lot_number' => 'L2024-001'],
             ['quantity' => 8, 'expiry_date' => now()->addYear()]
@@ -100,20 +88,8 @@ class DatabaseSeeder extends Seeder
             ['product_id' => $p2->id, 'lot_number' => 'L2024-045'],
             ['quantity' => 40, 'expiry_date' => null]
         );
-        StockLot::updateOrCreate(
-            ['product_id' => $p3->id, 'lot_number' => 'L2024-112'],
-            ['quantity' => 12, 'expiry_date' => null]
-        );
-        StockLot::updateOrCreate(
-            ['product_id' => $p4->id, 'lot_number' => 'L2024-089'],
-            ['quantity' => 4, 'expiry_date' => null]
-        );
-        StockLot::updateOrCreate(
-            ['product_id' => $p5->id, 'lot_number' => 'L2024-220'],
-            ['quantity' => 85, 'expiry_date' => null]
-        );
 
-        // 5. Cadastrar Contas Financeiras e Centros de Custo
+        // 5. Cadastrar Contas Financeiras e Centros de Custo (Máximo 2)
         $accCash = FinancialAccount::updateOrCreate(
             ['name' => 'Caixa Interno'],
             ['type' => 'cash', 'balance' => 5000.00]
@@ -125,7 +101,6 @@ class DatabaseSeeder extends Seeder
 
         $ccSales = CostCenter::updateOrCreate(['name' => 'Vendas']);
         $ccAdmin = CostCenter::updateOrCreate(['name' => 'Administrativo']);
-        $ccMarketing = CostCenter::updateOrCreate(['name' => 'Marketing']);
 
         // 6. Cadastrar Cupons
         $coupon = Coupon::updateOrCreate(

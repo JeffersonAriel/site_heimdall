@@ -40,16 +40,9 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 });
 
 // ---- Protected ERP routes (Sanctum & User Check) ----
-Route::middleware('auth:sanctum')->prefix('v1/erp')->group(function () {
-    Route::middleware(function ($request, $next) {
-        if (!($request->user() instanceof \App\Models\User)) {
-            return response()->json(['message' => 'Acesso negado. Apenas usuários do ERP.'], 403);
-        }
-        return $next($request);
-    })->group(function () {
-        // Products management
-        Route::post('/products', [\Modules\Products\Http\Controllers\ProductsController::class, 'store']);
-        Route::put('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'update']);
-        Route::delete('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'destroy']);
-    });
+Route::middleware(['auth:sanctum', 'erp.user'])->prefix('v1/erp')->group(function () {
+    // Products management
+    Route::post('/products', [\Modules\Products\Http\Controllers\ProductsController::class, 'store']);
+    Route::put('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'update']);
+    Route::delete('/products/{id}', [\Modules\Products\Http\Controllers\ProductsController::class, 'destroy']);
 });

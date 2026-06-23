@@ -130,9 +130,6 @@ const showNotifs = ref(false);
 const notifications = ref([
   { id:1, title:'⚠️ Estoque crítico: Cabo HDMI 2.1 2m (8 un)', type:'warning', time:'Há 5 min', read: false },
   { id:2, title:'🛒 Novo pedido #9905 recebido — R$ 2.480,00', type:'info',    time:'Há 12 min', read: false },
-  { id:3, title:'🎫 Novo ticket aberto: "Nota fiscal não recebida"', type:'info', time:'Há 30 min', read: false },
-  { id:4, title:'✅ NF-e #4410 emitida com sucesso', type:'success', time:'Há 1h', read: true },
-  { id:5, title:'💰 Conta a pagar vencendo em 2 dias: Fornecedor ABC', type:'warning', time:'Há 2h', read: true },
 ]);
 const markAllRead = () => notifications.value.forEach(n => n.read = true);
 
