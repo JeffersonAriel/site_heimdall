@@ -46,6 +46,17 @@ if ($repoPath && $action === 'migrate') {
     }
 }
 
+if ($repoPath && $action === 'seed') {
+    $cmds = [
+        'php ' . escapeshellarg($repoPath . '/artisan') . ' db:seed --force',
+    ];
+    foreach ($cmds as $cmd) {
+        exec($cmd . ' 2>&1', $out, $code);
+        $output .= "$ $cmd\n" . implode("\n", $out) . "\nExit: $code\n\n";
+        $out = [];
+    }
+}
+
 // Status atual
 exec('git -C ' . escapeshellarg($repoPath ?? $homeDir) . ' status 2>&1', $statusOut);
 $status = implode("\n", $statusOut);
@@ -109,6 +120,7 @@ if ($repoPath && file_exists($repoPath . '/storage/logs/laravel.log')) {
 <p class="warn">⚠️ O reset vai apagar arquivos não-commitados (EXCETO .env e vendor)</p>
 <a href="?action=reset" onclick="return confirm('Confirma reset do repositório?')">🔄 Executar git reset --hard + clean</a>
 <a href="?action=migrate" onclick="return confirm('Confirma execução de php artisan migrate --force?')">⚙️ Rodar Migrations (Artisan)</a>
+<a href="?action=seed" onclick="return confirm('Confirma execução de php artisan db:seed --force?')">🌱 Popular Banco (Seed)</a>
 <a href="?action=status">🔃 Atualizar Status</a>
 
 <?php endif; ?>
